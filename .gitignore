@@ -1,0 +1,31 @@
+
+# Ignore everything
+/*
+
+# Shared modpack folders
+!/mods/
+!/config/
+!/defaultconfigs/
+!/datapacks/
+!/resourcepacks/
+!/schematics/
+!/imported_world_presets/
+
+# Include all contents of shared folders
+!/mods/**
+!/config/**
+!/defaultconfigs/**
+!/datapacks/**
+!/resourcepacks/**
+!/schematics/**
+!/imported_world_presets/**
+
+# Optional development folders
+!/kubejs/
+!/kubejs/**
+!/scripts/
+!/scripts/**
+
+# Git files
+!/.gitignore
+!/README.md

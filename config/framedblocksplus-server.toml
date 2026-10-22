@@ -1,0 +1,2 @@
+#Enables the FramedBlocks+ diagnostic Debug Block and render-forensics framework. Keep this disabled during normal play unless troubleshooting.
+debugEnabled = false

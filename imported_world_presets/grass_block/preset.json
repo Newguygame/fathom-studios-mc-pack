@@ -1,0 +1,14 @@
+{
+  "name": "grass block",
+  "seed": -5133380148269297179,
+  "generateStructures": true,
+  "generator": "minecraft:flat",
+  "hasSpawn": true,
+  "spawnX": 0,
+  "spawnY": 0,
+  "spawnZ": 0,
+  "spawnAngle": 0.0,
+  "dataVersion": 3955,
+  "sizeBytes": 11568028,
+  "created": "2026-10-18T18:42:26.831831600Z"
+}
