@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Safe server-only mod sync. Called BEFORE NeoForge starts.
 
-Requires a reviewed server-manifest.tsv in the GitHub server branch.
+Uses generated server-manifest.tsv in the GitHub server branch.
 Does nothing if the manifest is empty or downloads fail.
 """
 import hashlib
@@ -69,8 +69,11 @@ def main():
                 if not destination.exists() or hashlib.sha256(destination.read_bytes()).hexdigest() != digest:
                     changed.append(name)
             excluded = ["appleskin-neoforge-mc1.21-3.0.9.jar","athena-neoforge-1.21.1-4.0.6.jar","BadOptimizations-2.4.1-1.21.1.jar","Controlling-neoforge-1.21.1-19.0.5.jar","CrashAssistant-neoforge-1.20.6-1.21.4-1.11.12.jar","fusion-1.3.16-neoforge-mc1.21.1.jar","ImmediatelyFast-NeoForge-1.6.15+1.21.1.jar","MouseTweaks-neoforge-mc1.21-2.26.1.jar","Searchables-neoforge-1.21.1-1.0.2.jar","sodium-neoforge-0.8.13+mc1.21.1.jar","xaerominimap-neoforge-1.21.1-26.6.0.jar","xaeroworldmap-neoforge-1.21.1-1.47.0.jar"]
-            unwanted = [name for name in excluded if (MODS / name).is_file()]
+            managed_file = ROOT / ".server-managed-mods.txt"
+            previous = set(managed_file.read_text().splitlines()) if managed_file.exists() else set()
+            unwanted = sorted(name for name in (previous - set(names)) | set(excluded) if (MODS / name).is_file())
             if not changed and not unwanted:
+                managed_file.write_text("\n".join(sorted(names))+"\n")
                 print("[mods] Already up to date.")
                 return 0
             backups = ROOT / "mod-backups"
@@ -99,6 +102,7 @@ def main():
                     else:
                         dest.unlink(missing_ok=True)
                 raise
+            managed_file.write_text("\n".join(sorted(names))+"\n")
             print("[mods] Updated", len(changed), "mod(s), removed", len(unwanted), "client-only mod(s); backups in", backup)
         return 0
     except Exception as exc:
