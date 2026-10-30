@@ -68,7 +68,9 @@ def main():
                 destination = MODS / name
                 if not destination.exists() or hashlib.sha256(destination.read_bytes()).hexdigest() != digest:
                     changed.append(name)
-            if not changed:
+            excluded = ["appleskin-neoforge-mc1.21-3.0.9.jar","athena-neoforge-1.21.1-4.0.6.jar","BadOptimizations-2.4.1-1.21.1.jar","Controlling-neoforge-1.21.1-19.0.5.jar","CrashAssistant-neoforge-1.20.6-1.21.4-1.11.12.jar","fusion-1.3.16-neoforge-mc1.21.1.jar","ImmediatelyFast-NeoForge-1.6.15+1.21.1.jar","MouseTweaks-neoforge-mc1.21-2.26.1.jar","Searchables-neoforge-1.21.1-1.0.2.jar","sodium-neoforge-0.8.13+mc1.21.1.jar","xaerominimap-neoforge-1.21.1-26.6.0.jar","xaeroworldmap-neoforge-1.21.1-1.47.0.jar"]
+            unwanted = [name for name in excluded if (MODS / name).is_file()]
+            if not changed and not unwanted:
                 print("[mods] Already up to date.")
                 return 0
             backups = ROOT / "mod-backups"
@@ -77,7 +79,7 @@ def main():
             stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             backup = backups / stamp
             backup.mkdir(exist_ok=False)
-            for name in changed:
+            for name in changed + unwanted:
                 destination = MODS / name
                 if destination.exists():
                     shutil.copy2(destination, backup / name)
@@ -86,8 +88,10 @@ def main():
                 for name in changed:
                     os.replace(stage / name, MODS / name)
                     completed.append(name)
+                for name in unwanted:
+                    (MODS / name).unlink()
             except Exception:
-                for name in completed:
+                for name in completed + unwanted:
                     old = backup / name
                     dest = MODS / name
                     if old.exists():
@@ -95,7 +99,7 @@ def main():
                     else:
                         dest.unlink(missing_ok=True)
                 raise
-            print("[mods] Updated", len(changed), "mod(s); previous versions backed up in", backup)
+            print("[mods] Updated", len(changed), "mod(s), removed", len(unwanted), "client-only mod(s); backups in", backup)
         return 0
     except Exception as exc:
         print("[mods] Update skipped; existing mods retained:", exc, file=sys.stderr)
