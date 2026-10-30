@@ -1,0 +1,40 @@
+name: Publish server mods
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mods/**'
+      - 'scripts/build-server-mods.py'
+      - '.github/workflows/server-mods.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-server-mods
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Check out server branch separately
+        run: |
+          git fetch origin server
+          git worktree add server-worktree -B server origin/server
+      - name: Generate server mod selection
+        run: python3 scripts/build-server-mods.py
+      - name: Push server branch
+        run: |
+          cd server-worktree
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mods server-manifest.tsv
+          if git diff --cached --quiet; then
+            echo "Server mods unchanged"
+          else
+            git commit -m "Auto-sync server mods from main"
+            git push origin HEAD:server
+          fi
